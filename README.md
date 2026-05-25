@@ -1,4 +1,4 @@
-# Real Estate Sales Dashboard Using PowerBI
+# Real Estate Sales Dashboard Using Power BI
 
 **Primary Tool: Microsoft Power BI**
 
@@ -7,50 +7,79 @@
 ## Dashboard Preview
 
 ![Dashboard](Dashboard.png)
+
+---
+
+## Project Purpose
+
+This project analyzes real estate sales performance across the MENA region — covering 3,000 transactions worth EGP 3.09B across 40 agents, 500 properties, and 8 cities (Cairo, Giza, Alexandria, Dubai, Sharjah, Riyadh, Jeddah, Amman) between 2022 and 2024. The dashboard is structured around a sales overview view that tracks revenue, commissions, units sold, and client volume — segmented by agent, property condition, city, transaction type, and time period to support brokerage management decisions on agent performance, market prioritization, and product mix.
+
 ---
 
 ## Data Model
 
-The project follows a **Star Schema** with one central fact table and four dimension tables.
+The project follows a **Star Schema** with one central fact table and five dimension tables.
 
 ```
-FACT_Transactions
-├── DIM_Date        — Year, Month, MonthName (time intelligence)
-├── DIM_Agent       — Agent name and performance grouping
-├── DIM_Property    — Property condition, city, type, area
-└── DIM_Client      — Client identification and segmentation
+FACT_Transactions (3,000 rows — 2022 to 2024)
+├── DIM_Date              (1,096 rows — daily granularity, full 3-year calendar)
+├── DIM_Agent             (40 rows  — name, branch, specialization, experience, rating)
+├── DIM_Property          (500 rows — type, city, district, area, condition, amenities)
+├── DIM_Client            (800 rows — type, nationality, age group, lead source)
+└── DIM_TransactionType   (4 rows  — Sale, Re-Sale, Rental, Lease)
 ```
 
 ### Fact Table — Key Columns
 
-| Column | Description |
-|---|---|
-| TransactionKey | Unique transaction identifier |
-| FinalPriceEGP | Final sale price in Egyptian Pounds |
-| CommissionEGP | Commission earned on the transaction |
-| ClientKey | Foreign key to DIM_Client |
+| Column            | Description                                          |
+| ----------------- | ---------------------------------------------------- |
+| TransactionKey    | Unique transaction identifier                        |
+| ListingPriceEGP   | Original listing price in Egyptian Pounds            |
+| FinalPriceEGP     | Final sale price in Egyptian Pounds                  |
+| CommissionRate    | Commission percentage applied                        |
+| CommissionEGP     | Commission earned on the transaction                 |
+| DaysOnMarket      | Number of days from listing to deal closure          |
+| Status            | Completed, Pending, Cancelled, Under Review          |
+| PaymentMethod     | Cash, Mortgage, Bank Transfer, Installment           |
+| NegotiationDisc   | Negotiated discount from listing price               |
+
+### Dimension Breakdowns
+
+**Properties (500):** Eight types — Townhouse (416), Warehouse (410), Apartment (407), Penthouse (401), Studio (359), Villa (350), Retail Space (331), Office (326). Four conditions — Excellent, New, Good, Needs Renovation.
+
+**Agents (40):** Five specializations — Residential, Rental, Industrial, Luxury, Commercial. Experience and rating tracked per agent.
+
+**Clients (800):** Five types — Individual (largest segment), Investor, Corporate, Expat, Government. Lead sources span Social Media, Walk-in, Property Portal, Website, Exhibition, Phone, and Referral.
+
+**Geography (8 cities):** Cairo, Giza, Alexandria (Egypt), Dubai, Sharjah (UAE), Riyadh, Jeddah (KSA), Amman (Jordan).
 
 ---
 
 ## Key Performance Indicators
 
-| KPI | Description |
-|---|---|
-| Total Units Sold | Count of completed transactions |
-| Total Revenue | Sum of FinalPriceEGP across all transactions |
-| Total Commissions Paid | Sum of CommissionEGP across all transactions |
-| Number of Clients | Distinct count of clients served |
+| Metric                | Value           |
+| --------------------- | --------------- |
+| Total Revenue         | EGP 3.09B       |
+| Total Commissions     | EGP 113M        |
+| Total Transactions    | 3,000           |
+| Completed Deals       | 2,074 (69.1%)   |
+| Average Deal Size     | EGP 1.03M       |
+| Average Days on Market| 65.6            |
+| Active Agents         | 40              |
+| Active Clients        | 800             |
+| Date Range            | 2022 – 2024     |
 
 ---
 
 ## Dashboard Page — Sales Overview
 
 **Visuals:**
+
 - KPI Cards — Total Units Sold, Total Revenue, Total Commissions Paid, Number of Clients
-- Clustered Column Chart — Transaction count or revenue by Agent Name
+- Clustered Column Chart — Revenue and transaction count by Agent Name
 - Clustered Bar Chart — Performance breakdown by Property Condition
-- Pie Chart — Revenue or unit distribution by City
-- Line Chart — Revenue or transaction volume by Month and Year (trend view)
+- Pie Chart — Revenue distribution by City
+- Line Chart — Revenue and transaction volume by Month and Year (trend view)
 
 **Filters available:** Year, Month, City, Agent Name, Property Condition
 
@@ -58,36 +87,52 @@ FACT_Transactions
 
 ## Analytical Findings
 
-### Agent Performance Concentration
-The dashboard reveals transaction and revenue distribution across named agents. In most real estate markets, a small number of agents drive a disproportionate share of total revenue. If the data follows this pattern, the top two or three agents likely account for the majority of FinalPriceEGP and CommissionEGP totals.
+### Sale Transactions Drive Nearly Two-Thirds of Revenue Despite Being Below 40% of Volume
 
-**Implication:** Management should identify whether high-performing agents are concentrated in specific cities or property conditions, and use that insight to inform training programs, territory assignments, and commission structure design for lower-performing agents.
+Sale and Re-Sale transactions together generate 93.6% of total revenue (67.8% and 25.8% respectively) from only 54.3% of transaction volume. Rental and Lease transactions account for 45.6% of activity but contribute just 6.4% of revenue combined.
 
-### Property Condition as a Revenue Driver
-The breakdown by `Condition` (property state — new, used, under construction, etc.) enables comparison of average transaction value and volume across property types. Higher-condition properties typically command higher prices but move in lower volumes.
+**Implication:** While rental volume keeps the agent network active and feeds the client pipeline, the commercial weight of the business sits in ownership transactions. Commission structure design and agent KPIs should reflect this asymmetry — rewarding sale closures more heavily than rental throughput. For Rental-specialized agents, the dashboard should track lead-to-sale conversion as a secondary metric to surface agents who use rentals as a funnel into higher-value sales.
 
-**Implication:** If the data shows that one condition category generates disproportionately high revenue despite lower unit counts, the brokerage should consider reallocating agent time and marketing budget toward that segment rather than spreading resources evenly across all property conditions.
+### Revenue is Distributed Nearly Evenly Across All Eight Cities
 
-### City-Level Market Prioritization
-The pie chart segmentation by City provides a clear view of which geographic markets contribute most to total revenue and client volume. A city accounting for a large revenue share but a small client count indicates high average transaction value — a premium market. The inverse indicates a volume market.
+The eight cities each contribute between 11% and 14% of total revenue, with Alexandria (14.0%) and Dubai (14.0%) at the top and Giza, Amman, and Riyadh (each 11%) at the bottom. The spread between the highest and lowest city is under 3 percentage points.
 
-**Implication:** Expansion and staffing decisions should be informed by city-level revenue density rather than raw transaction counts alone. Cities with high revenue-per-transaction ratios may justify dedicated agents or targeted property acquisition partnerships.
+**Implication:** The near-uniform distribution indicates either a well-balanced regional network or that no specific city has been deliberately prioritized for growth. Uniform revenue does not imply uniform profitability — the next analytical layer should examine commission yield per city (CommissionEGP / FinalPriceEGP) and operating cost density to identify whether certain cities are generating revenue at lower margin or higher acquisition cost. Alexandria's leadership at the highest average deal size (EGP 1.23M) suggests it may be the natural candidate for premium-property focus.
 
-### Seasonality in Transaction Volume
-The monthly line chart tracks transaction activity over time, making seasonal peaks and troughs visible. Real estate markets typically exhibit seasonal patterns tied to academic calendars, economic cycles, and regional factors.
+### Property Quality is a Stronger Revenue Lever than Property Type
 
-**Implication:** If the line chart shows consistent volume spikes in specific months, the brokerage should pre-position agent capacity, marketing spend, and listing inventory ahead of those periods rather than responding to demand after it has already peaked.
+Excellent and New condition properties together account for 66% of revenue (38% and 28% respectively), while Needs Renovation properties contribute only 9% despite representing nearly 10% of transactions. Within property types, Penthouses lead at 29% of revenue from 13.4% of transactions — clear evidence that premium-format properties drive disproportionate value.
+
+**Implication:** Listing acquisition strategy should prioritize Excellent-condition and New properties, particularly in the Penthouse and Villa categories, which together generate 47% of revenue from 25% of transactions. For Needs Renovation inventory, the brokerage should consider whether the time investment per agent is justified by the lower deal value — or whether these properties should be channelled through a dedicated specialist rather than the general agent pool.
+
+### Agent Revenue Distribution is Healthy, Not Pareto-Concentrated
+
+The top 5 agents (12.5% of the agent base) generate 16.3% of revenue, and the top 10 (25%) generate 31.1%. This is notably flatter than the typical 80/20 concentration seen in real estate sales organizations, where top-decile agents often capture 40–60% of revenue.
+
+**Implication:** A well-distributed performance curve is a positive signal — it reduces key-person risk and indicates training and onboarding are producing consistent output across the agent base. However, the lack of clear standouts also raises the question of whether the top performers are being recognized and retained appropriately, or whether the commission structure unintentionally flattens incentives. The dashboard's agent-level drill-down should be paired with a tenure overlay to confirm that top performers are not concentrated in a specific experience cohort that may eventually churn.
+
+### Cancellation Rates Cluster Geographically
+
+Dubai (12.9%), Riyadh (11.9%), and Cairo (11.7%) carry the highest cancellation rates, while Giza (8.0%) and Jeddah (8.0%) carry the lowest — a 5-percentage-point spread between best and worst markets.
+
+**Implication:** Cancellation differentials of this size warrant investigation rather than acceptance as random variation. Possible drivers include inspection or documentation friction specific to certain regulatory environments, agent experience mix differing by city, or pricing/negotiation discipline. A targeted root-cause analysis on Dubai and Riyadh cancellations could recover meaningful revenue — at the current average deal size of EGP 1.03M, every prevented cancellation in those two markets is worth approximately EGP 1M in topline impact.
+
+### Year-Over-Year Growth is Steady but Moderate
+
+Transaction volume grew from 969 (2022) to 1,006 (2023) to 1,025 (2024), and revenue grew from EGP 934M to EGP 1.05B to EGP 1.11B — roughly 8.5% annual revenue growth with much flatter volume growth (under 6% over the two-year span).
+
+**Implication:** Revenue is growing faster than volume, meaning average deal size is rising — a positive signal for either market appreciation or successful upmarket movement. However, the modest volume growth suggests the brokerage is capturing more value per transaction rather than expanding its market footprint. If growth strategy is volume-led, this trend indicates the current acquisition channels (which are distributed nearly evenly across seven lead sources, none above 16% of revenue) may need consolidation around the highest-converting channel rather than continued even spread.
 
 ---
 
 ## Tools & Technologies
 
-| Tool | Application |
-|---|---|
-| Power BI Desktop | Data modeling, DAX measures, dashboard authoring |
-| Power Query (M) | Data loading and transformation from source |
-| DAX | KPI calculations — revenue sums, commission totals, distinct client count |
-| Star Schema | Dimensional modeling across four dimension tables |
+| Tool             | Application                                                               |
+| ---------------- | ------------------------------------------------------------------------- |
+| Microsoft Excel  | Data source and star schema design                                        |
+| Power BI Desktop | Data modeling, DAX measures, report authoring                             |
+| Power Query (M)  | Data loading and transformation                                           |
+| DAX              | KPI measures — Total Revenue, Commissions, Units Sold, Client Count       |
 
 ---
 
@@ -96,7 +141,8 @@ The monthly line chart tracks transaction activity over time, making seasonal pe
 ```
 real-estate-sales-dashboard/
 │
-├── Real_Estate_Sales_Dashboard.pbix     # Power BI report file
+├── Real_Estate_Practice_Dataset.xlsx   # Source data (star schema, 6 sheets)
+├── Real_Estate_Sales_Dashboard.pbix    # Power BI report file
 ├── Dashboard.png
 └── README.md
 ```
@@ -106,13 +152,13 @@ real-estate-sales-dashboard/
 ## Setup Instructions
 
 1. Clone this repository.
-2. Open `Real_Estate_Sales_Dashboard.pbix` in Power BI Desktop.
-3. If prompted, update the data source connection to match your local environment.
-4. Click Refresh — all KPIs and visuals will populate from the connected data model.
+2. Open `Real_Estate_Practice_Dataset.xlsx` — no modifications are required; it is the static data source.
+3. Open `Real_Estate_Sales_Dashboard.pbix` in Power BI Desktop.
+4. If prompted, update the data source path to the local location of the Excel file.
+5. Click Refresh — all visuals and KPIs will populate automatically.
 
 ---
 
 ## Author
 
-**Abdallah ElZakaziky**
-[LinkedIn](https://www.linkedin.com/in/abdallahelzakaziky/) 
+**Abdallah ElZakaziky** — [LinkedIn](https://www.linkedin.com/in/abdallahelzakaziky/)
